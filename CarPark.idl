@@ -1,0 +1,58 @@
+#ifndef CAR_PARK
+#define CAR_PARK
+
+module Carpark {
+    interface EntryGate {
+        readonly attribute string machine_name;
+        void turn_on();
+        void turn_off();
+        void reset();
+    };
+
+    interface ExitGate {
+        readonly attribute string machine_name;
+        void turn_on();
+        void turn_off();
+        void reset();
+    };
+
+    interface PayStation {
+        readonly attribute string machine_name;
+        void turn_on();
+        void turn_off();
+        void reset();
+        long return_cash_total();
+    };
+
+    struct DateTime {
+        long time;
+        long date;
+    };
+
+    enum EventType {
+        Entry,
+        Exit
+    };
+
+    struct VehicleEvent {
+        EventType eventType;
+        DateTime date; 
+        string registration_number;
+    };
+
+    typedef sequence<VehicleEvent> Log_of_vehicle_events;
+
+    interface LocalServer {
+        readonly attribute string location;
+        readonly attribute Log_of_vehicle_events log;
+        void vehicle_in(in VehicleEvent event);
+        void vehicle_out(in VehicleEvent event);
+        boolean vehicle_in_car_park(in string registration_number);
+        long return_cash_total();
+        void add_entry_gate(in string gate_name, in string gate_ior);
+        void add_exit_gate(in string gate_name, in string gate_ior);
+        void add_pay_station(in string station_name, in string station_ior);
+    };
+};
+
+#endif
