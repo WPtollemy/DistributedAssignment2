@@ -1,9 +1,11 @@
 #ifndef COMPANY
 #define COMPANY
 
+#include "CarPark.idl"
+
 module Company {
     interface CompanyHQ {
-        void raise_alarm(in VehicleEvent event);
+        void raise_alarm(in Carpark::VehicleEvent event);
         void register_local_server(in string server_name, in string server_ior);
     };
 };

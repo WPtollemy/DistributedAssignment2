@@ -8,7 +8,7 @@ import javax.swing.*;
 import org.omg.CORBA.*;
 import org.omg.CosNaming.*;
 
-public class EntryGateClient extends JFrame
+public class PayStationClient extends JFrame
 {
     //ORB Components / local server
     LocalServer localServer;
@@ -16,7 +16,7 @@ public class EntryGateClient extends JFrame
     //JSwing Components
     private JTextField registrationNumIn;
 
-    public EntryGateClient() {
+    public PayStationClient() {
         initOrb();
         initGUIComponents();
         this.setSize(450,150);
@@ -52,7 +52,7 @@ public class EntryGateClient extends JFrame
     }
 
     private void initGUIComponents() {
-        setTitle("Entry Gate UI");
+        setTitle("Pay Station UI");
 
         Container cp = getContentPane();
         cp.setLayout (new BorderLayout ());
@@ -78,10 +78,10 @@ public class EntryGateClient extends JFrame
         jPanel3.setLayout (new FlowLayout ());
 
         JButton vehicleEntryButton = new JButton();
-        vehicleEntryButton.setText("Enter vehicle");
+        vehicleEntryButton.setText("Get ticket");
         vehicleEntryButton.addActionListener (new java.awt.event.ActionListener () {
             public void actionPerformed (java.awt.event.ActionEvent evt) {
-                registerVehicleIn(evt);
+                getTicket(evt);
             }
         }  );
 
@@ -92,14 +92,9 @@ public class EntryGateClient extends JFrame
         cp.add (jPanel3, "South");
     }
 
-    private void registerVehicleIn(java.awt.event.ActionEvent evt) {
+    private void getTicket(java.awt.event.ActionEvent evt) {
         try {
-            EventType type = EventType.from_int(0);
-            DateTime  date = new DateTime(1030, 18);
-            String  regNum = "A1";
-            VehicleEvent event = new VehicleEvent(type, date, regNum);
-
-            localServer.vehicle_in(event);
+            localServer.vehicle_in_car_park("test reg");
 
         } catch(Exception e) {
             System.err.println("Exception");
@@ -108,7 +103,7 @@ public class EntryGateClient extends JFrame
     }
 
     public static void main( String[] args ) {
-        EntryGateClient entryGate = new EntryGateClient();
-        entryGate.setVisible(true);
+        PayStationClient payStation = new PayStationClient();
+        payStation.setVisible(true);
     }
 }

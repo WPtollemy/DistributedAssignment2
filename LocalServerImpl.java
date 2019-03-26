@@ -22,6 +22,7 @@ public class LocalServerImpl extends LocalServerPOA
     }
 
     public boolean vehicle_in_car_park(String registration_number) {
+        System.out.println("vehicle is in car park");
         return true;
     }
 

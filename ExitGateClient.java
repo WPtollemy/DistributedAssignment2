@@ -41,7 +41,7 @@ public class ExitGateClient extends JFrame
                 return;
             }
 
-            // resolve the Count object reference in the Naming service
+            // resolve the local server object reference in the Naming service
             String name = "localServer";
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
 

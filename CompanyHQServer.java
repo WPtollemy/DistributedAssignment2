@@ -1,4 +1,3 @@
-import Carpark.*;
 import Company.*;
 
 import java.io.*;
@@ -8,7 +7,7 @@ import org.omg.PortableServer.*;
 import org.omg.PortableServer.POA;
 import org.omg.CosNaming.*;
 
-public class LocalServerClient
+public class CompanyHQServer
 {
     static public void main(String[] args) {
         try {
@@ -19,12 +18,12 @@ public class LocalServerClient
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();
 
-            // Create the local server servant object
-            LocalServerImpl localServant = new LocalServerImpl();
+            // Create the company HQ servant object
+            CompanyHQImpl companyHQServant = new CompanyHQImpl();
 
             // get object reference from the servant
-            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(localServant);
-            LocalServer cref = LocalServerHelper.narrow(ref);
+            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(companyHQServant);
+            CompanyHQ cref = CompanyHQHelper.narrow(ref);
 
             // Get a reference to the Naming service
             org.omg.CORBA.Object nameServiceObj = orb.resolve_initial_references ("NameService");
@@ -41,17 +40,13 @@ public class LocalServerClient
                 return;
             }
 
-            // bind the local server object in the Naming service
-            String name = "localServer";
-            NameComponent[] localServer = nameService.to_name(name);
-            nameService.rebind(localServer, cref);
+            // bind the company HQ object in the Naming service
+            String name = "companyHQ";
+            NameComponent[] companyHQ = nameService.to_name(name);
+            nameService.rebind(companyHQ, cref);
 
             //  wait for invocations from clients
             orb.run();
-
-            // resolve the local server object reference in the Naming service
-            String companyName = "companyHQ";
-            CompanyHQ companyHQServer = CompanyHQHelper.narrow(nameService.resolve_str(companyName));
 
         } catch(Exception e) {
             System.err.println(e);
