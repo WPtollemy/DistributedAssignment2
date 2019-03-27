@@ -3,6 +3,7 @@ import Company.*;
 
 import java.io.*;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 import org.omg.CORBA.*;
 import org.omg.PortableServer.*;
@@ -25,7 +26,6 @@ public class LocalServerImpl extends LocalServerPOA
             // Get a reference to the Naming service
             org.omg.CORBA.Object nameServiceObj = orb.resolve_initial_references ("NameService");
             if (nameServiceObj == null) {
-                System.out.println("nameServiceObj = null");
                 return;
             }
 
@@ -33,7 +33,6 @@ public class LocalServerImpl extends LocalServerPOA
             // Naming Service (INS) specification.
             NamingContextExt nameService = NamingContextExtHelper.narrow(nameServiceObj);
             if (nameService == null) {
-                System.out.println("nameService = null");
                 return;
             }
 
@@ -55,8 +54,6 @@ public class LocalServerImpl extends LocalServerPOA
 
     public void vehicle_in(VehicleEvent e) {
         System.out.println("vehicle marked as in");
-        System.out.println(e.date.date);
-        System.out.println(e.date.time);
         regNums.add(e.registration_number);
     }
 
@@ -75,6 +72,7 @@ public class LocalServerImpl extends LocalServerPOA
         }
 
         if (!ticketFound) {
+            System.out.println("alarm case 2");
             companyHQServer.raise_alarm(e);
         }
     }
@@ -85,21 +83,20 @@ public class LocalServerImpl extends LocalServerPOA
         //Current time
         Calendar currentDate = Calendar.getInstance();
 
-        //Expected leave time
+        /*Expected leave time */ 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HHmm");
         String time = Integer.toString(ticket.startDate.time);
-        if (time.length() == 3)
-            time += "0";
-
-        //Create date of datetime given
-        String hour = time.substring(0,2);
-        String minutes = time.substring(2,4);
-        int  intHour = Integer.parseInt(hour);
-        int  intMinutes = Integer.parseInt(minutes);
+        Date date = new Date();
+        try {
+            date = simpleDateFormat.parse(time);
+        } catch (Exception exc) {
+        }
+        /**/
 
         Calendar cal1 = Calendar.getInstance();
         cal1.set(Calendar.DATE, ticket.startDate.date);
-        cal1.set(Calendar.HOUR_OF_DAY, intHour);
-        cal1.set(Calendar.MINUTE, intMinutes);
+        cal1.set(Calendar.HOUR_OF_DAY, date.getHours());
+        cal1.set(Calendar.MINUTE, date.getMinutes());
 
         // Length + stay time
         // Turn stay length into hours + 5 minutes
@@ -108,9 +105,13 @@ public class LocalServerImpl extends LocalServerPOA
         long t= cal1.getTimeInMillis();
         Date expectedLeaveDate=new Date(t + (10 * endStayTime));
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+        System.out.println(sdf.format(expectedLeaveDate));
 
-        if (expectedLeaveDate.after(currentDate.getTime()))
+        if (currentDate.getTime().after(expectedLeaveDate)) {
+            System.out.println("alarm case 1");
             companyHQServer.raise_alarm(e);
+        }
 
     }
 

@@ -2,8 +2,6 @@ import Carpark.*;
 import config.orb_config;
 
 import java.util.*;
-import java.time.format.DateTimeFormatter;  
-import java.time.LocalDateTime;    
 
 import java.io.*;
 import java.awt.*;
@@ -49,7 +47,6 @@ public class EntryGateClient extends JFrame
 
             // resolve the local server object reference in the Naming service
             String name = "localServer" + location;
-            System.out.println(name);
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
 
         } catch(Exception e) {

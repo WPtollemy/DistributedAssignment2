@@ -41,7 +41,6 @@ public class CompanyHQServer extends JFrame
             // Get a reference to the Naming service
             org.omg.CORBA.Object nameServiceObj = orb.resolve_initial_references ("NameService");
             if (nameServiceObj == null) {
-                System.out.println("nameServiceObj = null");
                 return;
             }
 
@@ -49,7 +48,6 @@ public class CompanyHQServer extends JFrame
             // Naming Service (INS) specification.
             NamingContextExt nameService = NamingContextExtHelper.narrow(nameServiceObj);
             if (nameService == null) {
-                System.out.println("nameService = null");
                 return;
             }
 

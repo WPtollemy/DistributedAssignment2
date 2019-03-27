@@ -1,6 +1,9 @@
 import Carpark.*;
 import config.orb_config;
 
+import java.util.*;
+import java.text.SimpleDateFormat;
+
 import java.io.*;
 import java.awt.*;
 import javax.swing.*;
@@ -12,14 +15,16 @@ public class PayStationClient extends JFrame
 {
     //ORB Components / local server
     LocalServer localServer;
+    String location = "";
 
     //JSwing Components
     private JTextField registrationNumIn;
-    private JTextField registrationNumIn2;
+    private JTextField timeIn;
+    private JLabel notifLabel;
     private Container  cp;
-    private Container secondPane;
 
-    public PayStationClient() {
+    public PayStationClient(String location) {
+        this.location = location;
         initOrb();
         initGUIComponents();
         this.setSize(450,150);
@@ -45,7 +50,7 @@ public class PayStationClient extends JFrame
             }
 
             // resolve the local server object reference in the Naming service
-            String name = "localServer";
+            String name = "localServer" + location;
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
 
         } catch(Exception e) {
@@ -64,6 +69,9 @@ public class PayStationClient extends JFrame
         JPanel jPanel1 = new JPanel();
         jPanel1.setLayout (new FlowLayout ());
 
+        notifLabel = new JLabel();
+        jPanel1.add (notifLabel);
+
         //Center Panel to view comments
         JPanel jPanel2 = new JPanel();
         jPanel2.setLayout (new GridLayout (2, 2, 5, 5));
@@ -76,6 +84,15 @@ public class PayStationClient extends JFrame
         registrationNumIn.setText ("");
         jPanel2.add (registrationNumIn);
 
+
+        JLabel timeLabel = new JLabel();
+        timeLabel.setText ("Time required: ");
+        jPanel2.add (timeLabel);
+
+        timeIn = new JTextField (12);
+        timeIn.setText ("");
+        jPanel2.add (timeIn);
+
         //South Panel to add comments
         JPanel jPanel3 = new JPanel();
         jPanel3.setLayout (new FlowLayout ());
@@ -84,7 +101,7 @@ public class PayStationClient extends JFrame
         vehicleEntryButton.setText("Find Car");
         vehicleEntryButton.addActionListener (new java.awt.event.ActionListener () {
             public void actionPerformed (java.awt.event.ActionEvent evt) {
-                checkRegistration(evt);
+                getTicket(evt);
             }
         }  );
 
@@ -93,73 +110,43 @@ public class PayStationClient extends JFrame
         cp.add (jPanel1, "North");
         cp.add (jPanel2, "Center");
         cp.add (jPanel3, "South");
-
-
-        // Second stage / pane
-        secondPane = new JPanel();
-        secondPane.setLayout (new BorderLayout ());
-
-        //North Panel to select topics
-        JPanel jPanel4 = new JPanel();
-        jPanel4.setLayout (new FlowLayout ());
-
-        //Center Panel to view comments
-        JPanel jPanel5 = new JPanel();
-        jPanel5.setLayout (new GridLayout (2, 2, 5, 5));
-
-        JLabel timeLabel = new JLabel();
-        timeLabel.setText ("Time required: ");
-        jPanel5.add (timeLabel);
-
-        registrationNumIn2 = new JTextField (12);
-        registrationNumIn2.setText ("");
-        jPanel5.add (registrationNumIn2);
-
-        //South Panel to add comments
-        JPanel jPanel6 = new JPanel();
-        jPanel6.setLayout (new FlowLayout ());
-
-        JButton ticketButton = new JButton();
-        ticketButton.setText("Get ticket");
-        ticketButton.addActionListener (new java.awt.event.ActionListener () {
-            public void actionPerformed (java.awt.event.ActionEvent evt) {
-                getTicket(evt);
-            }
-        }  );
-
-        jPanel6.add(ticketButton);
-
-        secondPane.add (jPanel4, "North");
-        secondPane.add (jPanel5, "Center");
-        secondPane.add (jPanel6, "South");
-    }
-
-    private void checkRegistration(java.awt.event.ActionEvent evt) {
-        try {
-            String registration = registrationNumIn.getText();
-            if (localServer.vehicle_in_car_park(registration)) {
-                System.out.println("Car found");
-                cp = secondPane;
-            }
-            System.out.println("Car tried to be found: " + registration);
-        } catch(Exception e) {
-            System.err.println("Exception");
-            System.err.println(e);
-        }
     }
 
     private void getTicket(java.awt.event.ActionEvent evt) {
         try {
-            localServer.vehicle_in_car_park(registrationNumIn.getText());
-
+            String registration = registrationNumIn.getText();
+            if (localServer.vehicle_in_car_park(registration)) {
+                localServer.ticket_created(createTicket());
+                notifLabel.setText ("Ticket Created");
+            }
         } catch(Exception e) {
             System.err.println("Exception");
             System.err.println(e);
         }
     }
 
+    private Ticket createTicket() {
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HHmm");
+        int intTime = Integer.parseInt(simpleDateFormat.format(cal.getTime()));
+
+        DateTime dateTimeCreated = new DateTime(intTime, cal.get(Calendar.DATE));
+        int  stayTime = Integer.parseInt(timeIn.getText());
+        String regNum = registrationNumIn.getText();
+        
+        return new Ticket(dateTimeCreated, stayTime, regNum);
+    }
+
     public static void main( String[] args ) {
-        PayStationClient payStation = new PayStationClient();
+        // Find location from args if exists
+        String location = "";
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-location")) {
+                location = args[i+1];
+            }
+        }
+
+        PayStationClient payStation = new PayStationClient(location);
         payStation.setVisible(true);
     }
 }
