@@ -1,6 +1,10 @@
 import Carpark.*;
 import config.orb_config;
 
+import java.util.*;
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;    
+
 import java.io.*;
 import java.awt.*;
 import javax.swing.*;
@@ -12,11 +16,13 @@ public class EntryGateClient extends JFrame
 {
     //ORB Components / local server
     LocalServer localServer;
+    String location = "";
 
     //JSwing Components
     private JTextField registrationNumIn;
 
-    public EntryGateClient() {
+    public EntryGateClient(String location) {
+        this.location = location;
         initOrb();
         initGUIComponents();
         this.setSize(450,150);
@@ -42,7 +48,8 @@ public class EntryGateClient extends JFrame
             }
 
             // resolve the local server object reference in the Naming service
-            String name = "localServer";
+            String name = "localServer" + location;
+            System.out.println(name);
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
 
         } catch(Exception e) {
@@ -93,10 +100,16 @@ public class EntryGateClient extends JFrame
     }
 
     private void registerVehicleIn(java.awt.event.ActionEvent evt) {
+
+        Calendar cal = Calendar.getInstance();
+        String  hour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
+        String  time = hour + cal.get(Calendar.MINUTE);
+        int  intTime = Integer.parseInt(time);
+
         try {
-            EventType type = EventType.from_int(0);
-            DateTime  date = new DateTime(1030, 18);
-            String  regNum = "A1";
+            EventType     type = EventType.from_int(0);
+            DateTime      date = new DateTime(intTime, cal.get(Calendar.DATE));
+            String      regNum = registrationNumIn.getText();
             VehicleEvent event = new VehicleEvent(type, date, regNum);
 
             localServer.vehicle_in(event);
@@ -108,7 +121,15 @@ public class EntryGateClient extends JFrame
     }
 
     public static void main( String[] args ) {
-        EntryGateClient entryGate = new EntryGateClient();
+        // Find location from args if exists
+        String location = "";
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-location")) {
+                location = args[i+1];
+            }
+        }
+
+        EntryGateClient entryGate = new EntryGateClient(location);
         entryGate.setVisible(true);
     }
 }

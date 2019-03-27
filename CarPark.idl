@@ -31,12 +31,19 @@ module Carpark {
 
     enum EventType {
         Entry,
-        Exit
+        Exit,
+        TicketCreation
     };
 
     struct VehicleEvent {
         EventType eventType;
         DateTime date; 
+        string registration_number;
+    };
+
+    struct Ticket {
+        DateTime startDate; 
+        long stay_length;
         string registration_number;
     };
 
@@ -47,6 +54,7 @@ module Carpark {
         readonly attribute Log_of_vehicle_events log;
         void vehicle_in(in VehicleEvent event);
         void vehicle_out(in VehicleEvent event);
+        void ticket_created(in Ticket ticket);
         boolean vehicle_in_car_park(in string registration_number);
         long return_cash_total();
         void add_entry_gate(in string gate_name, in string gate_ior);

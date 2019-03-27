@@ -15,6 +15,9 @@ public class PayStationClient extends JFrame
 
     //JSwing Components
     private JTextField registrationNumIn;
+    private JTextField registrationNumIn2;
+    private Container  cp;
+    private Container secondPane;
 
     public PayStationClient() {
         initOrb();
@@ -54,7 +57,7 @@ public class PayStationClient extends JFrame
     private void initGUIComponents() {
         setTitle("Pay Station UI");
 
-        Container cp = getContentPane();
+        cp = getContentPane();
         cp.setLayout (new BorderLayout ());
 
         //North Panel to select topics
@@ -78,10 +81,10 @@ public class PayStationClient extends JFrame
         jPanel3.setLayout (new FlowLayout ());
 
         JButton vehicleEntryButton = new JButton();
-        vehicleEntryButton.setText("Get ticket");
+        vehicleEntryButton.setText("Find Car");
         vehicleEntryButton.addActionListener (new java.awt.event.ActionListener () {
             public void actionPerformed (java.awt.event.ActionEvent evt) {
-                getTicket(evt);
+                checkRegistration(evt);
             }
         }  );
 
@@ -90,11 +93,64 @@ public class PayStationClient extends JFrame
         cp.add (jPanel1, "North");
         cp.add (jPanel2, "Center");
         cp.add (jPanel3, "South");
+
+
+        // Second stage / pane
+        secondPane = new JPanel();
+        secondPane.setLayout (new BorderLayout ());
+
+        //North Panel to select topics
+        JPanel jPanel4 = new JPanel();
+        jPanel4.setLayout (new FlowLayout ());
+
+        //Center Panel to view comments
+        JPanel jPanel5 = new JPanel();
+        jPanel5.setLayout (new GridLayout (2, 2, 5, 5));
+
+        JLabel timeLabel = new JLabel();
+        timeLabel.setText ("Time required: ");
+        jPanel5.add (timeLabel);
+
+        registrationNumIn2 = new JTextField (12);
+        registrationNumIn2.setText ("");
+        jPanel5.add (registrationNumIn2);
+
+        //South Panel to add comments
+        JPanel jPanel6 = new JPanel();
+        jPanel6.setLayout (new FlowLayout ());
+
+        JButton ticketButton = new JButton();
+        ticketButton.setText("Get ticket");
+        ticketButton.addActionListener (new java.awt.event.ActionListener () {
+            public void actionPerformed (java.awt.event.ActionEvent evt) {
+                getTicket(evt);
+            }
+        }  );
+
+        jPanel6.add(ticketButton);
+
+        secondPane.add (jPanel4, "North");
+        secondPane.add (jPanel5, "Center");
+        secondPane.add (jPanel6, "South");
+    }
+
+    private void checkRegistration(java.awt.event.ActionEvent evt) {
+        try {
+            String registration = registrationNumIn.getText();
+            if (localServer.vehicle_in_car_park(registration)) {
+                System.out.println("Car found");
+                cp = secondPane;
+            }
+            System.out.println("Car tried to be found: " + registration);
+        } catch(Exception e) {
+            System.err.println("Exception");
+            System.err.println(e);
+        }
     }
 
     private void getTicket(java.awt.event.ActionEvent evt) {
         try {
-            localServer.vehicle_in_car_park("test reg");
+            localServer.vehicle_in_car_park(registrationNumIn.getText());
 
         } catch(Exception e) {
             System.err.println("Exception");

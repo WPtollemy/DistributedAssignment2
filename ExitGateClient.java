@@ -12,11 +12,14 @@ public class ExitGateClient extends JFrame
 {
     //ORB Components / local server
     LocalServer localServer;
+    String location = "";
 
     //JSwing Components
     private JTextField registrationNumIn;
+    private JLabel notifLabel;
 
-    public ExitGateClient() {
+    public ExitGateClient(String location) {
+        this.location = location;
         initOrb();
         initGUIComponents();
         this.setSize(450,150);
@@ -42,7 +45,7 @@ public class ExitGateClient extends JFrame
             }
 
             // resolve the local server object reference in the Naming service
-            String name = "localServer";
+            String name = "localServer" + location;
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
 
         } catch(Exception e) {
@@ -60,6 +63,9 @@ public class ExitGateClient extends JFrame
         //North Panel to select topics
         JPanel jPanel1 = new JPanel();
         jPanel1.setLayout (new FlowLayout ());
+
+        notifLabel = new JLabel();
+        jPanel1.add (notifLabel);
 
         //Center Panel to view comments
         JPanel jPanel2 = new JPanel();
@@ -93,10 +99,17 @@ public class ExitGateClient extends JFrame
     }
 
     private void registerVehicleOut(java.awt.event.ActionEvent evt) {
+        notifLabel.setText ("");
         try {
+            String regNum = registrationNumIn.getText();
+
+            if (!localServer.vehicle_in_car_park(regNum)) {
+                notifLabel.setText ("Car not found in Car Park");
+                return;
+            }
+
             EventType type = EventType.from_int(0);
             DateTime  date = new DateTime(1030, 18);
-            String  regNum = "A1";
             VehicleEvent event = new VehicleEvent(type, date, regNum);
 
             localServer.vehicle_out(event);
@@ -108,7 +121,15 @@ public class ExitGateClient extends JFrame
     }
 
     public static void main( String[] args ) {
-        ExitGateClient exitGate = new ExitGateClient();
+        // Find location from args if exists
+        String location = "";
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-location")) {
+                location = args[i+1];
+            }
+        }
+
+        ExitGateClient exitGate = new ExitGateClient(location);
         exitGate.setVisible(true);
     }
 }
