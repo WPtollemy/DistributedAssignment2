@@ -9,13 +9,16 @@ import java.awt.*;
 import javax.swing.*;
 
 import org.omg.CORBA.*;
+import org.omg.PortableServer.*;
+import org.omg.PortableServer.POA;
 import org.omg.CosNaming.*;
 
 public class PayStationClient extends JFrame
 {
     //ORB Components / local server
-    LocalServer localServer;
-    String location = "";
+    private LocalServer localServer;
+    private PayStationImpl payStationServant;
+    private String location = "";
 
     //JSwing Components
     private JTextField registrationNumIn;
@@ -36,6 +39,17 @@ public class PayStationClient extends JFrame
             // Initialize the ORB
             ORB orb = ORB.init(orb_config.returnArgs(), null);
 
+            // get reference to rootpoa & activate the POAManager
+            POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            rootpoa.the_POAManager().activate();
+
+            // Create the local server servant object
+            payStationServant = new PayStationImpl(orb, location);
+
+            // get object reference from the servant
+            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(payStationServant);
+            PayStation cref = PayStationHelper.narrow(ref);
+
             // Get a reference to the Naming service
             org.omg.CORBA.Object nameServiceObj = orb.resolve_initial_references ("NameService");
             if (nameServiceObj == null) {
@@ -52,6 +66,14 @@ public class PayStationClient extends JFrame
             // resolve the local server object reference in the Naming service
             String name = "localServer" + location;
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
+
+            // bind the pay station object in the Naming service
+            String payStationName = "payStation" + location;
+            NameComponent[] payStation = nameService.to_name(payStationName);
+            nameService.rebind(payStation, cref);
+
+            //  wait for invocations from clients
+            //orb.run();
 
         } catch(Exception e) {
             System.err.println("Exception");
@@ -116,7 +138,7 @@ public class PayStationClient extends JFrame
         try {
             String registration = registrationNumIn.getText();
             if (localServer.vehicle_in_car_park(registration)) {
-                localServer.ticket_created(createTicket());
+                payStationServant.storeTicket(createTicket());
                 notifLabel.setText ("Ticket Created");
             }
         } catch(Exception e) {

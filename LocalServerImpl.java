@@ -12,11 +12,15 @@ import org.omg.CosNaming.*;
 
 public class LocalServerImpl extends LocalServerPOA
 {
+    //ORB Components etc
     private ORB orb;
     private String location;
     private CompanyHQ companyHQServer;
+    private NamingContextExt nameService;
+
     private ArrayList<String> regNums = new ArrayList<String>();
     private ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+    private ArrayList<String> payStationNames = new ArrayList<String>();
 
     public LocalServerImpl(ORB orb_val, String location) {
         orb = orb_val;
@@ -31,7 +35,7 @@ public class LocalServerImpl extends LocalServerPOA
 
             // Use NamingContextExt which is part of the Interoperable
             // Naming Service (INS) specification.
-            NamingContextExt nameService = NamingContextExtHelper.narrow(nameServiceObj);
+            nameService = NamingContextExtHelper.narrow(nameServiceObj);
             if (nameService == null) {
                 return;
             }
@@ -123,7 +127,19 @@ public class LocalServerImpl extends LocalServerPOA
     }
 
     public int return_cash_total() {
-        return 10;
+        int cash_total = 0;
+
+        //Loop through stored paystations and get cash total
+        try {
+            // resolve the pay station object references in the Naming service
+            String name = "payStation" + location;
+            PayStation payStation = PayStationHelper.narrow(nameService.resolve_str(name));
+            cash_total += payStation.return_cash_total();
+        } catch (Exception e) {
+            //Do nothing atm
+        }
+
+        return cash_total;
     }
 
     public void add_entry_gate(String gate_name, String gate_ior) {

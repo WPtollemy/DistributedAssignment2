@@ -48,6 +48,10 @@ public class LocalServerClient
                 return;
             }
 
+            // resolve the local server object reference in the Naming service
+            String companyName = "companyHQ";
+            CompanyHQ companyHQServer = CompanyHQHelper.narrow(nameService.resolve_str(companyName));
+
             // bind the local server object in the Naming service
             String name = "localServer" + location;
             NameComponent[] localServer = nameService.to_name(name);
@@ -55,10 +59,6 @@ public class LocalServerClient
 
             //  wait for invocations from clients
             orb.run();
-
-            // resolve the local server object reference in the Naming service
-            String companyName = "companyHQ";
-            CompanyHQ companyHQServer = CompanyHQHelper.narrow(nameService.resolve_str(companyName));
         } catch(Exception e) {
             System.err.println(e);
         }
