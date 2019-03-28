@@ -72,7 +72,6 @@ public class LocalServerImpl extends LocalServerPOA
         }
 
         if (!ticketFound) {
-            System.out.println("alarm case 2");
             companyHQServer.raise_alarm(e);
         }
     }
@@ -83,33 +82,30 @@ public class LocalServerImpl extends LocalServerPOA
         //Current time
         Calendar currentDate = Calendar.getInstance();
 
-        /*Expected leave time */ 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HHmm");
-        String time = Integer.toString(ticket.startDate.time);
+        //Expected leave time 
+        //Set date to when they got ticket
         Date date = new Date();
         try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HHmm");
+            String time = Integer.toString(ticket.startDate.time);
             date = simpleDateFormat.parse(time);
         } catch (Exception exc) {
+            System.err.println(exc);
         }
-        /**/
 
         Calendar cal1 = Calendar.getInstance();
         cal1.set(Calendar.DATE, ticket.startDate.date);
         cal1.set(Calendar.HOUR_OF_DAY, date.getHours());
         cal1.set(Calendar.MINUTE, date.getMinutes());
+        long t = cal1.getTimeInMillis();
 
-        // Length + stay time
-        // Turn stay length into hours + 5 minutes
-        int endStayTime = ticket.stay_length * 3600000;
-        endStayTime += 5 * 60000;
-        long t= cal1.getTimeInMillis();
+        // Add stay length + 5 minutes
+        int endStayTime = ticket.stay_length * 360000;
+        endStayTime += (5 * 6000);
         Date expectedLeaveDate=new Date(t + (10 * endStayTime));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
-        System.out.println(sdf.format(expectedLeaveDate));
-
+        // Check the user leaves in time for ticket
         if (currentDate.getTime().after(expectedLeaveDate)) {
-            System.out.println("alarm case 1");
             companyHQServer.raise_alarm(e);
         }
 
