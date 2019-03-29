@@ -1,4 +1,5 @@
 import Company.*;
+import Carpark.*;
 import config.orb_config;
 
 import java.io.*;
@@ -12,13 +13,18 @@ import org.omg.CosNaming.*;
 
 public class CompanyHQServer extends JFrame
 {
+    //ORB Components etc
+    private NamingContextExt nameService;
+
+    private JPanel jPanel1; 
     private JTextArea textarea;
     private JScrollPane scrollpane;
+    private JComboBox<String> serverList;
 
     public CompanyHQServer() {
         initOrb();
         initGUIComponents();
-        this.setSize(450,150);
+        this.setSize(500,500);
         pack();
     }
     
@@ -46,7 +52,7 @@ public class CompanyHQServer extends JFrame
 
             // Use NamingContextExt which is part of the Interoperable
             // Naming Service (INS) specification.
-            NamingContextExt nameService = NamingContextExtHelper.narrow(nameServiceObj);
+            nameService = NamingContextExtHelper.narrow(nameServiceObj);
             if (nameService == null) {
                 return;
             }
@@ -71,12 +77,25 @@ public class CompanyHQServer extends JFrame
         cp.setLayout (new BorderLayout ());
 
         //North Panel to select topics
-        JPanel jPanel1 = new JPanel();
+        jPanel1 = new JPanel();
         jPanel1.setLayout (new FlowLayout ());
+
+        serverList = new JComboBox<String>();
+        jPanel1.add(serverList);
+
+        JButton totalsButton = new JButton();
+        totalsButton.setText("Cash total");
+        totalsButton.addActionListener (new java.awt.event.ActionListener () {
+            public void actionPerformed (java.awt.event.ActionEvent evt) {
+                getCashTotal(evt);
+            }
+        }  );
+
+        jPanel1.add(totalsButton);
 
         //Center Panel to view comments
         JPanel jPanel2 = new JPanel();
-        jPanel2.setLayout (new GridLayout (2, 2, 5, 5));
+        jPanel2.setLayout (new FlowLayout());
 
         textarea = new JTextArea(20,25);
         scrollpane = new JScrollPane(textarea);
@@ -93,6 +112,26 @@ public class CompanyHQServer extends JFrame
 
     protected void addMessage(String message) {
         textarea.append(message + "\n");
+    }
+
+    protected void registerLocalServer(String server_name) {
+        serverList.addItem(server_name);
+        jPanel1.revalidate();
+    }
+
+    private void getCashTotal(java.awt.event.ActionEvent evt) {
+        try {
+        String     selectedItem = "localServer" + (String)serverList.getSelectedItem();
+        LocalServer localServer = LocalServerHelper.narrow(nameService.resolve_str(selectedItem));
+        int amountTotal = localServer.return_cash_total();
+
+
+        //default title and icon
+        JOptionPane.showMessageDialog(this,
+            "Total cash earned for " + selectedItem + ": " + amountTotal);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
     static public void main(String[] args) {

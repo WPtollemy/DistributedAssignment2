@@ -22,7 +22,7 @@ public class ExitGateClient extends JFrame
         this.location = location;
         initOrb();
         initGUIComponents();
-        this.setSize(450,150);
+        this.setSize(500,500);
         pack();
     }
 
@@ -114,6 +114,7 @@ public class ExitGateClient extends JFrame
 
             localServer.vehicle_out(event);
 
+            System.out.println(localServer.return_cash_total());
         } catch(Exception e) {
             System.err.println("Exception");
             System.err.println(e);

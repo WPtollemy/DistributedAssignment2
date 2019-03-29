@@ -15,15 +15,17 @@ public class EntryGateClient extends JFrame
     //ORB Components / local server
     LocalServer localServer;
     String location = "";
+    String id = "";
 
     //JSwing Components
     private JTextField registrationNumIn;
 
     public EntryGateClient(String location) {
         this.location = location;
+        this.id = location;
         initOrb();
         initGUIComponents();
-        this.setSize(450,150);
+        this.setSize(500,500);
         pack();
     }
 

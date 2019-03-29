@@ -19,6 +19,7 @@ public class PayStationClient extends JFrame
     private LocalServer localServer;
     private PayStationImpl payStationServant;
     private String location = "";
+    private String id = "";
 
     //JSwing Components
     private JTextField registrationNumIn;
@@ -26,11 +27,12 @@ public class PayStationClient extends JFrame
     private JLabel notifLabel;
     private Container  cp;
 
-    public PayStationClient(String location) {
+    public PayStationClient(String location, String id) {
         this.location = location;
+        this.id = id;
         initOrb();
         initGUIComponents();
-        this.setSize(450,150);
+        this.setSize(500,500);
         pack();
     }
 
@@ -68,9 +70,11 @@ public class PayStationClient extends JFrame
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
 
             // bind the pay station object in the Naming service
-            String payStationName = "payStation" + location;
+            String payStationName = "payStation" + location + id;
             NameComponent[] payStation = nameService.to_name(payStationName);
             nameService.rebind(payStation, cref);
+
+            localServer.add_pay_station(payStationName, "null");
 
             //  wait for invocations from clients
             //orb.run();
@@ -162,13 +166,16 @@ public class PayStationClient extends JFrame
     public static void main( String[] args ) {
         // Find location from args if exists
         String location = "";
+        String id = "";
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-location")) {
                 location = args[i+1];
+            } else if (args[i].equals("-id")) {
+                id = args[i+1];
             }
         }
 
-        PayStationClient payStation = new PayStationClient(location);
+        PayStationClient payStation = new PayStationClient(location, id);
         payStation.setVisible(true);
     }
 }

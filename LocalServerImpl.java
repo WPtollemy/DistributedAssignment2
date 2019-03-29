@@ -43,6 +43,8 @@ public class LocalServerImpl extends LocalServerPOA
             // resolve the local server object reference in the Naming service
             String companyName = "companyHQ";
             companyHQServer = CompanyHQHelper.narrow(nameService.resolve_str(companyName));
+
+            companyHQServer.register_local_server(location, "null");
         } catch(Exception e) {
             System.err.println(e);
         }
@@ -130,13 +132,14 @@ public class LocalServerImpl extends LocalServerPOA
         int cash_total = 0;
 
         //Loop through stored paystations and get cash total
-        try {
-            // resolve the pay station object references in the Naming service
-            String name = "payStation" + location;
-            PayStation payStation = PayStationHelper.narrow(nameService.resolve_str(name));
-            cash_total += payStation.return_cash_total();
-        } catch (Exception e) {
-            //Do nothing atm
+        for (String paystation : payStationNames) {
+            try {
+                // resolve the pay station object references in the Naming service
+                PayStation payStation = PayStationHelper.narrow(nameService.resolve_str(paystation));
+                cash_total += payStation.return_cash_total();
+            } catch (Exception e) {
+                //Do nothing atm
+            }
         }
 
         return cash_total;
@@ -149,5 +152,6 @@ public class LocalServerImpl extends LocalServerPOA
     }
 
     public void add_pay_station(String station_name, String startion_ior) {
+        payStationNames.add(station_name);
     }
 }
