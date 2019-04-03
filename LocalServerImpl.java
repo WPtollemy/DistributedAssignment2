@@ -21,6 +21,7 @@ public class LocalServerImpl extends LocalServerPOA
     private ArrayList<String> regNums = new ArrayList<String>();
     private ArrayList<Ticket> tickets = new ArrayList<Ticket>();
     private ArrayList<String> payStationNames = new ArrayList<String>();
+    private ArrayList<VehicleEvent> eventLog = new ArrayList<VehicleEvent>();
 
     public LocalServerImpl(ORB orb_val, String location) {
         orb = orb_val;
@@ -55,17 +56,20 @@ public class LocalServerImpl extends LocalServerPOA
     }
 
     public VehicleEvent[] log() {
-        return new VehicleEvent[1];
+        VehicleEvent[] evtArr = eventLog.toArray(new VehicleEvent[eventLog.size()]);
+        return evtArr;
     }
 
     public void vehicle_in(VehicleEvent e) {
         System.out.println("vehicle marked as in");
         regNums.add(e.registration_number);
+        eventLog.add(e);
     }
 
     public void vehicle_out(VehicleEvent e) {
         System.out.println("vehicle marked as out");
         regNums.remove(e.registration_number);
+        eventLog.add(e);
 
         boolean ticketFound = false;
         for(Ticket ticket : tickets){
@@ -119,6 +123,11 @@ public class LocalServerImpl extends LocalServerPOA
 
     public void ticket_created(Ticket ticket) {
         tickets.add(ticket);
+
+        EventType     type = EventType.from_int(2);
+        DateTime      date = ticket.startDate;
+        String      regNum = ticket.registration_number;
+        eventLog.add(new VehicleEvent(type, date, regNum));
     }
 
     public boolean vehicle_in_car_park(String registration_number) {
