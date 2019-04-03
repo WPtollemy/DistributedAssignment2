@@ -24,7 +24,7 @@ public class CompanyHQServer extends JFrame
     public CompanyHQServer() {
         initOrb();
         initGUIComponents();
-        this.setSize(500,500);
+        this.setSize(900,900);
         pack();
     }
     
@@ -81,6 +81,8 @@ public class CompanyHQServer extends JFrame
         jPanel1.setLayout (new FlowLayout ());
 
         serverList = new JComboBox<String>();
+        //To set a decent size width, add a prototype value
+        serverList.setPrototypeDisplayValue("long city name");
         jPanel1.add(serverList);
 
         JButton totalsButton = new JButton();
@@ -92,6 +94,16 @@ public class CompanyHQServer extends JFrame
         }  );
 
         jPanel1.add(totalsButton);
+
+        JButton logButton = new JButton();
+        logButton.setText("Log");
+        logButton.addActionListener (new java.awt.event.ActionListener () {
+            public void actionPerformed (java.awt.event.ActionEvent evt) {
+                getServerLog(evt);
+            }
+        }  );
+
+        jPanel1.add(logButton);
 
         //Center Panel to view comments
         JPanel jPanel2 = new JPanel();
@@ -126,9 +138,24 @@ public class CompanyHQServer extends JFrame
         int amountTotal = localServer.return_cash_total();
 
 
-        //default title and icon
+        //display total earned as a popout
         JOptionPane.showMessageDialog(this,
             "Total cash earned for " + selectedItem + ": " + amountTotal);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+
+    private void getServerLog(java.awt.event.ActionEvent evt) {
+        try {
+        String     selectedItem = "localServer" + (String)serverList.getSelectedItem();
+        LocalServer localServer = LocalServerHelper.narrow(nameService.resolve_str(selectedItem));
+        VehicleEvent[] log = localServer.log();
+
+
+        //TODO show a readable list
+        JOptionPane.showMessageDialog(this,
+            "Total cash earned for " + selectedItem + ": ");// + amountTotal);
         } catch (Exception e) {
             System.err.println(e);
         }

@@ -142,8 +142,16 @@ public class PayStationClient extends JFrame
         try {
             String registration = registrationNumIn.getText();
             if (localServer.vehicle_in_car_park(registration)) {
-                payStationServant.storeTicket(createTicket());
+                Ticket ticket = createTicket();
+                payStationServant.storeTicket(ticket);
                 notifLabel.setText ("Ticket Created");
+
+
+                //display total earned as a popout
+                JOptionPane.showMessageDialog(this,
+                        ticket.registration_number + "\n" +
+                        "Stay from: " + ticket.startDate.time + "-" + (ticket.startDate.time + (ticket.stay_length * 100)) + "\n" +
+                        "Stay length: " + ticket.stay_length + " hours \n");
             }
         } catch(Exception e) {
             System.err.println("Exception");
