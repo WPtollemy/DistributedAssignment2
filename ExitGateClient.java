@@ -6,19 +6,23 @@ import java.awt.*;
 import javax.swing.*;
 
 import org.omg.CORBA.*;
+import org.omg.PortableServer.*;
+import org.omg.PortableServer.POA;
 import org.omg.CosNaming.*;
 
 public class ExitGateClient extends JFrame
 {
     //ORB Components / local server
-    LocalServer localServer;
-    String location = "";
+    private LocalServer localServer;
+    private String location = "";
+    private String id = "";
+    private ExitGateImpl exitGateServant;
 
     //JSwing Components
     private JTextField registrationNumIn;
     private JLabel notifLabel;
 
-    public ExitGateClient(String location) {
+    public ExitGateClient(String location, String id) {
         this.location = location;
         initOrb();
         initGUIComponents();
@@ -30,6 +34,18 @@ public class ExitGateClient extends JFrame
         try {
             // Initialize the ORB
             ORB orb = ORB.init(orb_config.returnArgs(), null);
+
+            // get reference to rootpoa & activate the POAManager
+            POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            rootpoa.the_POAManager().activate();
+
+            // Create the pay station servant object
+            String exitGateName = "exitGate" + location + id;
+            exitGateServant = new ExitGateImpl(exitGateName);
+
+            // get object reference from the servant
+            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(exitGateServant);
+            ExitGate cref = ExitGateHelper.narrow(ref);
 
             // Get a reference to the Naming service
             org.omg.CORBA.Object nameServiceObj = orb.resolve_initial_references ("NameService");
@@ -47,6 +63,12 @@ public class ExitGateClient extends JFrame
             // resolve the local server object reference in the Naming service
             String name = "localServer" + location;
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
+
+            // bind the exit gate object in the Naming service
+            NameComponent[] exitGate = nameService.to_name(exitGateName);
+            nameService.rebind(exitGate, cref);
+
+            localServer.add_exit_gate(exitGateName, "null");
 
         } catch(Exception e) {
             System.err.println("Exception");
@@ -124,13 +146,16 @@ public class ExitGateClient extends JFrame
     public static void main( String[] args ) {
         // Find location from args if exists
         String location = "";
+        String id = "";
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-location")) {
                 location = args[i+1];
+            } else if (args[i].equals("-id")) {
+                id = args[i+1];
             }
         }
 
-        ExitGateClient exitGate = new ExitGateClient(location);
+        ExitGateClient exitGate = new ExitGateClient(location, id);
         exitGate.setVisible(true);
     }
 }

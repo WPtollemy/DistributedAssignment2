@@ -21,6 +21,8 @@ public class LocalServerImpl extends LocalServerPOA
     private ArrayList<String> regNums = new ArrayList<String>();
     private ArrayList<Ticket> tickets = new ArrayList<Ticket>();
     private ArrayList<String> payStationNames = new ArrayList<String>();
+    private ArrayList<String> entryGateNames = new ArrayList<String>();
+    private ArrayList<String> exitGateNames = new ArrayList<String>();
     private ArrayList<VehicleEvent> eventLog = new ArrayList<VehicleEvent>();
 
     public LocalServerImpl(ORB orb_val, String location) {
@@ -155,9 +157,11 @@ public class LocalServerImpl extends LocalServerPOA
     }
 
     public void add_entry_gate(String gate_name, String gate_ior) {
+        entryGateNames.add(gate_name);
     }
 
     public void add_exit_gate(String gate_name, String gate_ior) {
+        exitGateNames.add(gate_name);
     }
 
     public void add_pay_station(String station_name, String startion_ior) {

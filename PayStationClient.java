@@ -45,8 +45,8 @@ public class PayStationClient extends JFrame
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();
 
-            // Create the local server servant object
-            payStationServant = new PayStationImpl(orb, location);
+            // Create the pay station servant object
+            payStationServant = new PayStationImpl(orb, location, id);
 
             // get object reference from the servant
             org.omg.CORBA.Object ref = rootpoa.servant_to_reference(payStationServant);

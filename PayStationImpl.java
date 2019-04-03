@@ -13,9 +13,9 @@ public class PayStationImpl extends PayStationPOA
     private String machine_name;
     private int cash_total = 0;
 
-    public PayStationImpl(ORB orb_value, String location) {
+    public PayStationImpl(ORB orb_value, String location, String id) {
         orb = orb_value;
-        machine_name = location;
+        machine_name = "payStation" + location + id;
 
         try {
             // Get a reference to the Naming service

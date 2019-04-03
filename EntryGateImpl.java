@@ -7,6 +7,10 @@ public class EntryGateImpl extends EntryGatePOA
 {
     private String machine_name;
 
+    public EntryGateImpl(String machineName) {
+        machine_name = machineName;
+    }
+
     public void reset() {
     }
 
@@ -17,6 +21,6 @@ public class EntryGateImpl extends EntryGatePOA
     }
 
     public String machine_name() {
-        return "machine_name";
+        return machine_name;
     }
 }

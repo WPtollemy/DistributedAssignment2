@@ -8,21 +8,24 @@ import java.awt.*;
 import javax.swing.*;
 
 import org.omg.CORBA.*;
+import org.omg.PortableServer.*;
+import org.omg.PortableServer.POA;
 import org.omg.CosNaming.*;
 
 public class EntryGateClient extends JFrame
 {
     //ORB Components / local server
-    LocalServer localServer;
-    String location = "";
-    String id = "";
+    private LocalServer localServer;
+    private String location = "";
+    private String id = "";
+    private EntryGateImpl entryGateServant;
 
     //JSwing Components
     private JTextField registrationNumIn;
 
-    public EntryGateClient(String location) {
+    public EntryGateClient(String location, String id) {
         this.location = location;
-        this.id = location;
+        this.id = id;
         initOrb();
         initGUIComponents();
         this.setSize(500,500);
@@ -33,6 +36,18 @@ public class EntryGateClient extends JFrame
         try {
             // Initialize the ORB
             ORB orb = ORB.init(orb_config.returnArgs(), null);
+
+            // get reference to rootpoa & activate the POAManager
+            POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            rootpoa.the_POAManager().activate();
+
+            // Create the pay station servant object
+            String entryGateName = "entryGate" + location + id;
+            entryGateServant = new EntryGateImpl(entryGateName);
+
+            // get object reference from the servant
+            org.omg.CORBA.Object ref = rootpoa.servant_to_reference(entryGateServant);
+            EntryGate cref = EntryGateHelper.narrow(ref);
 
             // Get a reference to the Naming service
             org.omg.CORBA.Object nameServiceObj = orb.resolve_initial_references ("NameService");
@@ -50,6 +65,12 @@ public class EntryGateClient extends JFrame
             // resolve the local server object reference in the Naming service
             String name = "localServer" + location;
             localServer = LocalServerHelper.narrow(nameService.resolve_str(name));
+
+            // bind the entry gate object in the Naming service
+            NameComponent[] entryGate = nameService.to_name(entryGateName);
+            nameService.rebind(entryGate, cref);
+
+            localServer.add_entry_gate(entryGateName, "null");
 
         } catch(Exception e) {
             System.err.println("Exception");
@@ -122,13 +143,16 @@ public class EntryGateClient extends JFrame
     public static void main( String[] args ) {
         // Find location from args if exists
         String location = "";
+        String id = "";
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-location")) {
                 location = args[i+1];
+            } else if (args[i].equals("-id")) {
+                id = args[i+1];
             }
         }
 
-        EntryGateClient entryGate = new EntryGateClient(location);
+        EntryGateClient entryGate = new EntryGateClient(location, id);
         entryGate.setVisible(true);
     }
 }

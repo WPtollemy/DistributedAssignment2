@@ -7,6 +7,10 @@ public class ExitGateImpl extends ExitGatePOA
 {
     private String machine_name;
 
+    public ExitGateImpl(String machineName) {
+        machine_name = machineName;
+    }
+
     public void reset() {
     }
 
@@ -17,6 +21,6 @@ public class ExitGateImpl extends ExitGatePOA
     }
 
     public String machine_name() {
-        return "machine_name";
+        return machine_name;
     }
 }
