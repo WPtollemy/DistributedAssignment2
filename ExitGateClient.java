@@ -130,7 +130,7 @@ public class ExitGateClient extends JFrame
                 return;
             }
 
-            EventType type = EventType.from_int(0);
+            EventType type = EventType.from_int(1);
             DateTime  date = new DateTime(1030, 18);
             VehicleEvent event = new VehicleEvent(type, date, regNum);
 

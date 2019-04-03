@@ -70,8 +70,8 @@ public class LocalServerImpl extends LocalServerPOA
 
     public void vehicle_out(VehicleEvent e) {
         System.out.println("vehicle marked as out");
-        regNums.remove(e.registration_number);
         eventLog.add(e);
+        regNums.remove(e.registration_number);
 
         boolean ticketFound = false;
         for(Ticket ticket : tickets){

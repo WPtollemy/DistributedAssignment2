@@ -133,14 +133,15 @@ public class CompanyHQServer extends JFrame
 
     private void getCashTotal(java.awt.event.ActionEvent evt) {
         try {
-        String     selectedItem = "localServer" + (String)serverList.getSelectedItem();
-        LocalServer localServer = LocalServerHelper.narrow(nameService.resolve_str(selectedItem));
-        int amountTotal = localServer.return_cash_total();
+            String server = (String)serverList.getSelectedItem();
+            String selectedItem = "localServer" + server;
+            LocalServer localServer = LocalServerHelper.narrow(nameService.resolve_str(selectedItem));
+            int amountTotal = localServer.return_cash_total();
 
 
-        //display total earned as a popout
-        JOptionPane.showMessageDialog(this,
-            "Total cash earned for " + selectedItem + ": " + amountTotal);
+            //display total earned as a popout
+            JOptionPane.showMessageDialog(this,
+                    "Total cash earned for " + server + ": " + amountTotal);
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -148,14 +149,35 @@ public class CompanyHQServer extends JFrame
 
     private void getServerLog(java.awt.event.ActionEvent evt) {
         try {
-        String     selectedItem = "localServer" + (String)serverList.getSelectedItem();
-        LocalServer localServer = LocalServerHelper.narrow(nameService.resolve_str(selectedItem));
-        VehicleEvent[] log = localServer.log();
+            String server = (String)serverList.getSelectedItem();
+            String selectedItem = "localServer" + server;
+            LocalServer localServer = LocalServerHelper.narrow(nameService.resolve_str(selectedItem));
+            VehicleEvent[] log = localServer.log();
 
 
-        //TODO show a readable list
-        JOptionPane.showMessageDialog(this,
-            "Total cash earned for " + selectedItem + ": ");// + amountTotal);
+            JFrame frame = new JFrame();
+            String bigList[] = new String[log.length];
+
+            for (int i = 0; i < bigList.length; i++) {
+                String message = "";
+                switch(log[i].eventType.value()) {
+                    case 0:
+                        message = "Vehicle Entry: ";
+                        break;
+                    case 1:
+                        message = "Vehicle Exit: ";
+                        break;
+                    case 2:
+                        message = "Ticket Creation: ";
+                        break;
+                }
+
+
+                bigList[i] = message + log[i].registration_number;
+            }
+
+            JOptionPane.showMessageDialog(frame, bigList);
+
         } catch (Exception e) {
             System.err.println(e);
         }
